@@ -14,10 +14,10 @@
         label-position="top"
         class="login-form"
       >
-        <el-form-item prop="username">
+        <el-form-item prop="account">
           <span class="required-label">*</span>账号
           <el-input
-            v-model="loginForm.username"
+            v-model="loginForm.account"
             placeholder="请输入用户名"
             :prefix-icon="User"
           />
@@ -55,17 +55,23 @@
 <script setup>
 import { ref, reactive } from 'vue';
 import { User, Lock, ArrowRight } from '@element-plus/icons-vue';
+import { userLoginService } from '@/api/user.js';
+import { ElMessage } from 'element-plus';
+import { useRouter } from 'vue-router';
+import { useTokenStore } from '@/stores/token.js';
+const tokenStore = useTokenStore();
+const router = useRouter();
 
 // 定义要触发的事件
 const emit = defineEmits(['switch-component']);
 
 const loginForm = reactive({
-  username: '',
+  account: '',
   password: ''
 });
 
 const rules = {
-  username: [
+  account: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
     { min: 3, max: 20, message: '用户名长度应在3-20个字符之间', trigger: 'blur' }
   ],
@@ -80,14 +86,23 @@ const loginFormRef = ref(null);
 const handleLogin = async () => {
   if (!loginFormRef.value) return;
   
-  await loginFormRef.value.validate((valid, fields) => {
-    if (valid) {
-      console.log('登录表单验证通过:', loginForm);
-      // 处理登录逻辑
+  try {
+    await loginFormRef.value.validate();
+    const res = await userLoginService(loginForm);
+    console.log('登录成功:', res);
+    ElMessage.success('登录成功');
+    // 保存 token
+    tokenStore.setToken(res.data.token);
+    // TODO: 登录成功后的路由跳转
+    router.push('/');
+  } catch (err) {
+    // 区分表单验证错误和接口调用错误
+    if (err.fields) {
+      console.log('表单验证失败:', err.fields);
     } else {
-      console.log('登录表单验证失败:', fields);
+      console.error('登录失败:', err);
     }
-  });
+  }
 };
 
 // 可以定义一个切换方法（可选）

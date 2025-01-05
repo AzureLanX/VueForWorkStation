@@ -57,3 +57,10 @@ export const userRegisterService = (registerData)=>{
     return request.post('/user/register',registerData)
 }
 
+export const userLoginService = (loginData)=>{
+    return request.post('/user/login',loginData)
+}
+
+export const userTestService = ()=>{
+    return request.get('/user/test')
+}

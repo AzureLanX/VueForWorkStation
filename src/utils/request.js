@@ -74,6 +74,9 @@ const instance = axios.create({
     }
 })
 
+// import {useRouter} from 'vue-router'
+// const router = useRouter();
+import router from '@/routers/router.js'; // 导入路由实例
 //添加响应拦截器
 instance.interceptors.response.use(
     (response)=>{
@@ -86,7 +89,34 @@ instance.interceptors.response.use(
         return Promise.reject(response.data);
     },
     (error)=>{
+        //判断响应状态码,如果为401,则证明未登录,提示请登录,并跳转到登录页面
+        if(error.response.status===401){
+            ElMessage.error('请先登录')
+            router.push('/login')
+        }else{
+            console.log('test1')
+            ElMessage.error('服务异常')
+        }
         return Promise.reject(error);
+    }
+)
+
+import {useTokenStore} from '@/stores/token.js'
+//添加请求拦截器
+instance.interceptors.request.use(
+    (config)=>{
+        //请求前的回调
+        //添加token
+        const tokenStore = useTokenStore();
+        //判断有没有token
+        if(tokenStore.token){
+            config.headers.Authorization = tokenStore.token
+        }
+        return config;
+    },
+    (err)=>{
+        //请求错误的回调
+        Promise.reject(err)
     }
 )
 
