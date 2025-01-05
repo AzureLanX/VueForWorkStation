@@ -40,12 +40,12 @@ const switchComponent = () => {
 .login-page {
     display: flex;
     width: 100%;
-    height: 100vh;
+    height: 98.3vh;
 }
 
 .left-section {
     flex: 1;
-    background-color: #f5f7fa;
+    background-color: #e9ebf7;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -53,6 +53,7 @@ const switchComponent = () => {
 
 .right-section {
     flex: 2;
+    background-color: #f7f7f7;
     display: flex;
     align-items: center;
     justify-content: center;

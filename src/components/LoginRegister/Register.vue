@@ -11,10 +11,10 @@
         label-position="top"
         class="register-form"
       >
-        <el-form-item prop="username">
+        <el-form-item prop="account">
           <span class="required-label">*</span>账号
           <el-input
-            v-model="registerForm.username"
+            v-model="registerForm.account"
             placeholder="请输入用户名"
             :prefix-icon="User"
           />
@@ -73,11 +73,17 @@ import { User, Lock, Message, ArrowRight } from '@element-plus/icons-vue';
 const emit = defineEmits(['switch-component']);
 
 const registerForm = reactive({
-  username: '',
+  account: '',
   password: '',
-  confirmPassword: '',
-  email: ''
+  email: '',
+  confirmPassword: '' // 仅用于前端验证,不会传给后端
 });
+
+// 添加一个方法来获取要发送给后端的数据
+const getRegisterData = () => {
+  const { account, password, email } = registerForm;
+  return { account, password, email };
+};
 
 const validatePass2 = (rule, value, callback) => {
   if (value === '') {
@@ -90,9 +96,9 @@ const validatePass2 = (rule, value, callback) => {
 };
 
 const rules = {
-  username: [
+  account: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 3, max: 20, message: '用户名长度应在3-20个字符之间', trigger: 'blur' }
+    { min: 6, max: 20, message: '用户名长度应在6-20个字符之间', trigger: 'blur' }
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
@@ -110,17 +116,28 @@ const rules = {
 
 const registerFormRef = ref(null);
 
+import { userRegisterService } from '@/api/user.js';
+import { ElMessage } from 'element-plus';
 const handleRegister = async () => {
   if (!registerFormRef.value) return;
   
-  await registerFormRef.value.validate((valid, fields) => {
-    if (valid) {
-      console.log('注册表单验证通过:', registerForm);
-      // 处理注册逻辑
+  try {
+    await registerFormRef.value.validate();
+    // 只发送必要的数据给后端
+    const registerData = getRegisterData();
+    console.log(registerData);
+    const res = await userRegisterService(registerData);
+    console.log('注册成功:', res);
+    ElMessage.success('注册成功');
+    handleSwitch();
+  } catch (err) {
+    // 区分表单验证错误和接口调用错误
+    if (err.fields) {
+      console.log('表单验证失败:', err.fields);
     } else {
-      console.log('注册表单验证失败:', fields);
+      console.error('注册失败:', err);
     }
-  });
+  }
 };
 
 // 可以定义一个切换方法（可选）

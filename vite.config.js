@@ -9,5 +9,15 @@ export default defineConfig({
     alias:{
       '@': path.resolve(__dirname, './src')
     }
+  },
+  // 配置代理(还没用nginx的解决方法)
+  server:{
+    proxy:{
+      '/api':{
+        target:'http://localhost:8080',
+        changeOrigin:true,
+        rewrite:(path)=>path.replace(/^\/api/,'')
+      }
+    }
   }
 })

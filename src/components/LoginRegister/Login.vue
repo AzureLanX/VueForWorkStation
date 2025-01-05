@@ -35,7 +35,6 @@
         </el-form-item>
         
         <div class="options-row">
-          <el-checkbox v-model="loginForm.rememberMe">记住我</el-checkbox>
           <el-link type="primary">忘记密码？</el-link>
         </div>
 
@@ -62,8 +61,7 @@ const emit = defineEmits(['switch-component']);
 
 const loginForm = reactive({
   username: '',
-  password: '',
-  rememberMe: false
+  password: ''
 });
 
 const rules = {
@@ -139,7 +137,7 @@ const handleSwitch = () => {
 
 .options-row {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   margin: 15px 0;
 }
