@@ -1,7 +1,7 @@
 <template>
   <div class="register-container">
     <el-card class="register-box" :body-style="{ borderRadius: '16px' }">
-      <h3>创建账号</h3>
+      <h3 class="register-title">创建账号</h3>
       
       <el-form 
         ref="registerFormRef"
@@ -51,6 +51,29 @@
           />
         </el-form-item>
 
+        <el-form-item prop="verificationCode">
+          <span class="required-label">*</span>验证码
+          <div class="verification-code-container">
+            <el-input
+              v-model="registerForm.verificationCode"
+              placeholder="请输入验证码"
+              class="verification-input"
+            >
+              <template #append>
+                <el-button 
+                  @click="sendVerificationCode" 
+                  :disabled="isCodeSent"
+                  class="verify-code-btn"
+                  type="primary"
+                  text
+                >
+                  {{ isCodeSent ? `${countdown}s后重试` : '获取验证码' }}
+                </el-button>
+              </template>
+            </el-input>
+          </div>
+        </el-form-item>
+
         <el-button type="primary" native-type="submit" class="register-button" style="border-radius: 8px;">
           注册
           <el-icon class="el-icon--right"><ArrowRight /></el-icon>
@@ -68,6 +91,8 @@
 <script setup>
 import { ref, reactive } from 'vue';
 import { User, Lock, Message, ArrowRight } from '@element-plus/icons-vue';
+import { ElMessage } from 'element-plus';
+import { userRegisterService, getRegisterVerificationCodeService } from '@/api/user.js';
 
 // 定义要触发的事件
 const emit = defineEmits(['switch-component']);
@@ -76,13 +101,18 @@ const registerForm = reactive({
   account: '',
   password: '',
   email: '',
-  confirmPassword: '' // 仅用于前端验证,不会传给后端
+  confirmPassword: '',
+  verificationCode: ''
 });
+
+// 新增状态
+const isCodeSent = ref(false);
+const countdown = ref(60);
 
 // 添加一个方法来获取要发送给后端的数据
 const getRegisterData = () => {
-  const { account, password, email } = registerForm;
-  return { account, password, email };
+  const { account, password, email ,verificationCode} = registerForm;
+  return { account, password, email ,verificationCode};
 };
 
 const validatePass2 = (rule, value, callback) => {
@@ -116,8 +146,6 @@ const rules = {
 
 const registerFormRef = ref(null);
 
-import { userRegisterService } from '@/api/user.js';
-import { ElMessage } from 'element-plus';
 const handleRegister = async () => {
   if (!registerFormRef.value) return;
   
@@ -145,6 +173,37 @@ const handleSwitch = () => {
     console.log('触发切换到登录');
     emit('switch-component');
 };
+
+// 发送验证码的方法
+const sendVerificationCode = async () => {
+  if (isCodeSent.value) return; // 如果验证码已发送，则不再发送
+
+  // 先校验邮箱格式
+  try {
+    // 只校验email字段
+    await registerFormRef.value.validateField('email');
+    
+    // 邮箱验证通过后，发送验证码
+    await getRegisterVerificationCodeService(registerForm.email);
+    ElMessage.success('验证码已发送，请查收邮箱');
+    isCodeSent.value = true;
+
+    // 开始倒计时
+    const timer = setInterval(() => {
+      countdown.value--;
+      if (countdown.value <= 0) {
+        clearInterval(timer);
+        isCodeSent.value = false;
+        countdown.value = 60; // 重置倒计时
+      }
+    }, 1000);
+  } catch (error) {
+    // 如果是表单验证错误，不显示"发送验证码失败"的消息
+    if (!error.fields) {
+      ElMessage.error('发送验证码失败，请重试');
+    }
+  }
+};
 </script>
 
 <style scoped>
@@ -158,16 +217,17 @@ const handleSwitch = () => {
   box-sizing: border-box;
 }
 
+
 .register-box {
   width: 100%;
   max-width: 420px;
-  height: 580px; /* 固定高度 */
+  height: 650px; /* 固定高度 */
   text-align: center;
   margin: 0 40px;
   border-radius: 16px;
   display: flex;
   flex-direction: column;
-  padding: 30px 20px;
+  padding: 0px 20px;
   box-sizing: border-box;
 }
 
@@ -213,5 +273,123 @@ const handleSwitch = () => {
 .required-label {
   color: #f56c6c;
   margin-right: 4px;
+}
+
+.verify-code-btn {
+  height: 100%;
+  min-width: 100px;
+  padding: 0 20px;
+  font-size: 13px;
+  border-left: 1px solid var(--el-border-color-lighter);
+  border-radius: 0;
+  color: var(--el-color-primary);
+  white-space: nowrap;
+}
+
+.verify-code-btn.is-disabled {
+  color: var(--el-text-color-disabled);
+  cursor: not-allowed;
+}
+
+.divider {
+  width: 1px;
+  height: 16px;
+  background-color: var(--el-border-color);
+  margin: 0;
+}
+
+/* 覆盖 Element Plus 的默认样式 */
+:deep(.el-input-group__append) {
+  padding: 0;
+  background-color: var(--el-bg-color);
+  min-width: 100px;
+}
+
+:deep(.el-input-group__append button.el-button) {
+  border-radius: 0 8px 8px 0;
+}
+
+:deep(.el-input-group__append button.el-button:not(.is-disabled):hover) {
+  background-color: var(--el-fill-color-light);
+}
+
+:deep(.el-input-group__append button.el-button[disabled]) {
+  background-color: transparent;
+  border: none;
+}
+
+/* 确保输入框圆角一致 */
+:deep(.el-input__wrapper) {
+  border-radius: 8px;
+}
+
+:deep(.el-input.is-focus .el-input__wrapper) {
+  box-shadow: 0 0 0 1px var(--el-color-primary) inset;
+}
+
+.verification-input :deep(.el-input__wrapper) {
+  padding-right: 0;  /* 移除右侧内边距 */
+}
+
+.verification-code-container {
+  position: relative;
+  width: 100%;
+}
+
+.verification-input {
+  width: 100%;
+}
+
+.verification-input :deep(.el-input__wrapper) {
+  border-radius: 8px;
+}
+
+.verify-code-btn {
+  height: 100%;
+  padding: 0 15px;
+  font-size: 13px;
+  border-left: 1px solid var(--el-border-color-lighter);
+  border-radius: 0;
+  color: var(--el-color-primary);
+}
+
+.verify-code-btn:hover:not(:disabled) {
+  background-color: var(--el-color-primary-light-9);
+}
+
+.verify-code-btn:disabled {
+  color: var(--el-text-color-disabled);
+  cursor: not-allowed;
+  background-color: transparent;
+}
+
+:deep(.el-input-group__append) {
+  padding: 0;
+  background-color: var(--el-bg-color);
+}
+
+:deep(.el-input__wrapper) {
+  box-shadow: 0 0 0 1px var(--el-border-color) inset;
+}
+
+:deep(.el-input__wrapper:hover) {
+  box-shadow: 0 0 0 1px var(--el-border-color-hover) inset;
+}
+
+:deep(.el-input.is-focus .el-input__wrapper) {
+  box-shadow: 0 0 0 1px var(--el-color-primary) inset;
+}
+
+/* 移除输入框的右边框圆角 */
+.verification-input :deep(.el-input__wrapper) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* 添加按钮的右边框圆角 */
+:deep(.el-input-group__append) {
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+  overflow: hidden;
 }
 </style>

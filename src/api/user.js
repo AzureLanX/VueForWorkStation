@@ -62,3 +62,7 @@ export const userLoginService = (loginData)=>{
     return request.post('/user/login',loginData)
 }
 
+//提供获取验证码的函数
+export const getRegisterVerificationCodeService = (email)=>{
+    return request.get('/user/getRegisterVerificationCode',{params:{email}})
+}

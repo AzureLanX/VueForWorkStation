@@ -1,5 +1,5 @@
 <template>
-  <el-row :gutter="20">
+  <el-row :gutter="20" class="chart-row">
     <el-col :span="6" v-for="(item, index) in dataItems" :key="index">
       <el-card shadow="hover">
         <div class="data-item">
@@ -29,6 +29,9 @@ const dataItems = ref([
 </script>
 
 <style scoped>
+.chart-row {
+  margin-top: -10px;
+}
 .data-item {
   display: flex;
   align-items: center;

@@ -126,7 +126,7 @@ const handleSwitch = () => {
 .login-box {
   width: 100%;
   max-width: 420px;
-  height: 580px; /* 固定高度 */
+  height: 650px; /* 固定高度 */
   text-align: center;
   margin: 0 40px;
   border-radius: 16px;

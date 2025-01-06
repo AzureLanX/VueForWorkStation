@@ -118,6 +118,7 @@ onBeforeUnmount(() => {
 <style scoped>
 .chart-row {
   margin-top: 20px;
+  margin-bottom: -30px;
   height: calc(100% - 20px);
 }
 
