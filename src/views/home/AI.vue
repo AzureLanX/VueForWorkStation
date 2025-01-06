@@ -7,7 +7,8 @@
         <div class="message-content">
           <el-avatar v-if="message.role === 'ai'" :size="40" :icon="Service" class="avatar-left" />
           <el-avatar v-if="message.role === 'user'" :size="40" :icon="UserFilled" class="avatar-right" />
-          <div class="text-content">{{ message.content }}</div>
+          <div class="text-content" v-if="message.role === 'user'">{{ message.content }}</div>
+          <div class="text-content markdown-body" v-else v-html="renderMarkdown(message.content)"></div>
         </div>
       </div>
     </div>
@@ -36,6 +37,31 @@
 import { ref, nextTick } from 'vue'
 import { UserFilled, Service } from '@element-plus/icons-vue'
 import { getAIResponse } from '@/utils/KimiAI.js'
+import MarkdownIt from 'markdown-it'
+import hljs from 'highlight.js'
+import 'highlight.js/styles/github.css' // 选择一个你喜欢的主题
+import DOMPurify from 'dompurify'
+
+// 初始化 markdown-it
+const md = new MarkdownIt({
+  html: true,
+  breaks: true,
+  linkify: true,
+  highlight: function (str, lang) {
+    if (lang && hljs.getLanguage(lang)) {
+      try {
+        return hljs.highlight(str, { language: lang }).value
+      } catch (__) {}
+    }
+    return '' // 使用默认的转义
+  }
+})
+
+// 添加 markdown 渲染函数
+const renderMarkdown = (content) => {
+  const html = md.render(content)
+  return DOMPurify.sanitize(html)
+}
 
 const messages = ref([
   { role: 'ai', content: '你好！我是AI助手，有什么可以帮助你的吗？' }
@@ -43,12 +69,6 @@ const messages = ref([
 const inputMessage = ref('')
 const loading = ref(false)
 const messageContainer = ref(null)
-
-
-
-
-
-
 
 // 滚动到底部函数
 const scrollToBottom = async () => {
@@ -70,15 +90,18 @@ const sendMessage = async () => {
   // 设置加载状态
   loading.value = true
   
+  // 添加一个空的 AI 消息
+  messages.value.push({ role: 'ai', content: '' })
 
   try {
-    // 调用KimiAI接口
-    const aiResponse = await getAIResponse(userMessage);
-    messages.value.push({ role: 'ai', content: aiResponse });
-
-    await scrollToBottom();
+    // 使用回调函数更新消息内容
+    await getAIResponse(userMessage, (content) => {
+      messages.value[messages.value.length - 1].content = content
+      scrollToBottom()
+    })
   } catch (error) {
     console.error('AI响应错误:', error)
+    messages.value[messages.value.length - 1].content = '抱歉，发生了错误，请稍后重试。'
   } finally {
     loading.value = false
   }
@@ -163,5 +186,52 @@ const sendMessage = async () => {
 
 :deep(.el-textarea__inner) {
   resize: none;
+}
+
+/* 添加 markdown 样式 */
+.markdown-body {
+  font-size: 14px;
+}
+
+.markdown-body :deep(pre) {
+  background-color: #f6f8fa;
+  padding: 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+}
+
+.markdown-body :deep(code) {
+  font-family: Consolas, Monaco, 'Andale Mono', monospace;
+  background-color: rgba(175, 184, 193, 0.2);
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+  font-size: 85%;
+}
+
+.markdown-body :deep(p) {
+  margin: 8px 0;
+}
+
+.markdown-body :deep(ul), 
+.markdown-body :deep(ol) {
+  padding-left: 20px;
+}
+
+.markdown-body :deep(table) {
+  border-collapse: collapse;
+  margin: 12px 0;
+}
+
+.markdown-body :deep(th),
+.markdown-body :deep(td) {
+  border: 1px solid #d0d7de;
+  padding: 6px 13px;
+}
+
+.markdown-body :deep(blockquote) {
+  color: #666;
+  margin: 0;
+  padding-left: 12px;
+  border-left: 4px solid #ddd;
 }
 </style>
