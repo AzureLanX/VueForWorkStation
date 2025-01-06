@@ -53,14 +53,12 @@ import request from '@/utils/request.js'
 //     return request.post('/user/register',params)
 // }
 
+// 提供调用注册接口的函数
 export const userRegisterService = (registerData)=>{
     return request.post('/user/register',registerData)
 }
-
+// 提供调用登录接口的函数
 export const userLoginService = (loginData)=>{
     return request.post('/user/login',loginData)
 }
 
-export const userTestService = ()=>{
-    return request.get('/user/test')
-}

@@ -94,8 +94,8 @@ instance.interceptors.response.use(
             ElMessage.error('请先登录')
             router.push('/login')
         }else{
-            console.log('test1')
             ElMessage.error('服务异常')
+            router.push('/login')
         }
         return Promise.reject(error);
     }

@@ -1,19 +1,26 @@
 <template>
-    我是首页
+  <el-container class="layout-container">
+    <Navigator />
+    <el-container class="main-container">
+        <Aside />
+    </el-container>
+  </el-container>
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
-import { userTestService } from '@/api/user';
-onMounted(() => {
-    console.log('组件已挂载，可以在这里写你的函数');
-    // 这里可以写你要执行的函数
-    userTestService().then(res => {
-        console.log('测试接口返回:', res);
-    });
-});
+import Navigator from '@/components/home/Navigator.vue'
+import Aside from '@/components/home/Aside.vue'
 </script>
 
 <style scoped>
+.layout-container {
+  height: 98vh;
+  display: flex;
+  flex-direction: column;
+}
 
+.main-container {
+  flex: 1;
+  overflow: hidden;
+}
 </style>
