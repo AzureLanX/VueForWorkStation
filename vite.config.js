@@ -17,6 +17,11 @@ export default defineConfig({
         target:'http://localhost:8080',
         changeOrigin:true,
         rewrite:(path)=>path.replace(/^\/api/,'')
+      },
+      '/kimiai':{
+        target:'https://api.moonshot.cn/v1',
+        changeOrigin:true,
+        rewrite:(path)=>path.replace(/^\/kimiai/,'')
       }
     }
   }
