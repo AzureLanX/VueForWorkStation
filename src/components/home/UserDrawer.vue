@@ -72,7 +72,6 @@ import {
   Close  // 添加 Close 图标
 } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
-
 const router = useRouter()
 
 // 定义props
@@ -100,6 +99,7 @@ const handleMenuClick = (type) => {
   switch(type) {
     case 'profile':
       // 跳转到个人资料页
+      router.push('/userInfo')
       break
     case 'settings':
       // 跳转到设置页

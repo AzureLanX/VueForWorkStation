@@ -8,7 +8,7 @@ import SystemResource from "@/views/home/SystemResource.vue";
 import Driver from "@/views/home/Driver.vue";
 import Blog from "@/views/home/Blog.vue";
 import AI from "@/views/home/AI.vue";
-
+import UserInfo from "@/views/UserInfo.vue";
 
 const router = createRouter({
     history:createWebHistory(),
@@ -31,6 +31,12 @@ const router = createRouter({
             path:"/login",
             components:{
                 default:LoginPage
+            }
+        },
+        {
+            path:"/userInfo",
+            components:{
+                default:UserInfo
             }
         }
     ]

@@ -71,3 +71,9 @@ export const getRegisterVerificationCodeService = (email)=>{
 export const getUserInfoService = (id)=>{
     return request.get('/user/getUserById',{params:{id}})
 }
+
+// 修改头像地址
+export const userAvatarUpdateService = (avatarUrl)=>{
+    return request.put('/user/updateAvatar',{avatarUrl})
+}
+
