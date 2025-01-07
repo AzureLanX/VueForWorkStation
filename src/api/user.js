@@ -66,3 +66,8 @@ export const userLoginService = (loginData)=>{
 export const getRegisterVerificationCodeService = (email)=>{
     return request.get('/user/getRegisterVerificationCode',{params:{email}})
 }
+
+//获取用户信息的函数
+export const getUserInfoService = (id)=>{
+    return request.get('/user/getUserById',{params:{id}})
+}

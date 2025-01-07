@@ -59,7 +59,9 @@ import { userLoginService } from '@/api/user.js';
 import { ElMessage } from 'element-plus';
 import { useRouter } from 'vue-router';
 import { useTokenStore } from '@/stores/token.js';
+import { useIdStore } from '@/stores/id.js';
 const tokenStore = useTokenStore();
+const idStore = useIdStore();
 const router = useRouter();
 
 // 定义要触发的事件
@@ -93,6 +95,8 @@ const handleLogin = async () => {
     ElMessage.success('登录成功');
     // 保存 token
     tokenStore.setToken(res.data.token);
+    // 保存 id
+    idStore.setId(res.data.id);
     // TODO: 登录成功后的路由跳转
     router.push('/');
   } catch (err) {
